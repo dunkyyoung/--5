@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Card Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .card-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            margin-right: 20px;
+        }
+        .card-preview {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-left: 20px;
+            width: 200px;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .card-preview img {
+            max-width: 100%;
+            max-height: 60px;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        #cardInsert {
+            width: 200px;
+            height: 120px;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+            padding: 10px;
+            position: relative;
+            background-color: #f5f5f5;
+        }
+        .bankName {
+            position: absolute;
+            top: 15px;
+            left: 10px;
+            font-weight: bold;
+        }
+        .cardNumber {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+        }
+        .cardHolderName {
+            position: absolute;
+            bottom: 30px;
+            left: 10px;
+        }
+        .expiryDate {
+            position: absolute;
+            bottom: 50px;
+            left: 45%;
+            transform: translateX(-50%);
+        }
+        .paymentSystem {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card-form">
+        <h2>Bank Card Details</h2>
+        <form id="bankCardForm">
+            <label for="bankName">Bank Name:</label>
+            <input type="text" id="bankName" required><br><br>
+
+            <label for="paymentSystem">Payment System:</label>
+            <select id="paymentSystem" required>
+                <option value="visa">Visa</option>
+                <option value="mastercard">Mastercard</option>
+                <option value="МИР">МИР</option>
+                <!-- Добавление новой платежной системы -->
+                <option value="newPaymentSystem">New PaymentSystem</option>
+            </select><br><br>
+
+            <label for="cardNumber">Card Number:</label>
+            <input type="text" id="cardNumber" pattern="\d{16}" maxlength="16" required><br><br>
+
+            <label for="cardHolderName">Card Holder Name:</label>
+            <input type="text" id="cardHolderName" required><br><br>
+
+            <label for="expiryMonth">Expiry Month:</label>
+            <input type="text" id="expiryMonth" pattern="\d{1,2}" maxlength="2" required style="width: 30px;">
+            <span id="expirySeparator">/</span>
+            <label for="expiryYear">Expiry Year:</label>
+            <input type="text" id="expiryYear" pattern="\d{4}" maxlength="4" required style="width: 50px;"><br><br>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <div class="card-preview" id="cardPreview">
+        <h3>Card Preview</h3>
+        <img id="cardLogo" src="" alt="Card Logo">
+        <p id="previewBankName"></p>
+        <p id="previewCardType"></p>
+    </div>
+
+    <div id="cardInsert"></div>
+
+    <table id="cardTable">
+        <caption>Submitted Cards</caption>
+        <thead>
+            <tr>
+                <th>Bank</th>
+                <th>Payment System</th>
+                <th>Card Number</th>
+                <th>Card Holder Name</th>
+                <th>Expiry Date</th>
+            </tr>
+        </thead>
+        <tbody id="cardTableBody"></tbody>
+    </table>
+
+    <script>
+        const cardForm = document.getElementById('bankCardForm');
+        const cardPreview = document.getElementById('cardPreview');
+        const cardLogo = document.getElementById('cardLogo');
+        const previewBankName = document.getElementById('previewBankName');
+        const previewCardType = document.getElementById('previewCardType');
+        const cardInsert = document.getElementById('cardInsert');
+        const cardTableBody = document.getElementById('cardTableBody');
+
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('input', updateCardInfo);
+        });
+
+        const expiryMonthInput = document.getElementById('expiryMonth');
+        const expirySeparator = document.getElementById('expirySeparator');
+
+        expiryMonthInput.addEventListener('input', function() {
+            if (this.value.length === 1) {
+                expirySeparator.style.visibility = 'visible';
+            } else if (this.value.length === 0) {
+                expirySeparator.style.visibility = 'hidden';
+            }
+        });
+
+        function updateCardInfo() {
+            const bankName = document.getElementById('bankName').value;
+            const paymentSystem = document.getElementById('paymentSystem').value;
+            const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+            const cardHolderName = document.getElementById('cardHolderName').value;
+            const expiryMonth = document.getElementById('expiryMonth').value;
+            const expiryYear = document.getElementById('expiryYear').value;
+
+            // Update card preview
+            previewBankName.textContent = `Bank: ${bankName}`;
+            previewCardType.textContent = `Card Type: ${paymentSystem}`;
+
+            // Set card logo based on payment system
+            switch (paymentSystem) {
+                case 'visa':
+                    cardLogo.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/1280px-Visa_Inc._logo.svg.png';
+                    break;
+                case 'mastercard':
+                    cardLogo.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png';
+                    break;
+                case 'МИР':
+                    cardLogo.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Mir_logo.svg/1280px-Mir_logo.svg.png';
+                    break;
+                case 'newPaymentSystem':
+                    cardLogo.src = ''; // URL for new payment system logo
+                    break;
+                default:
+                    cardLogo.src = '';
+                    break;
+            }
+
+            // Update card insert
+            cardInsert.innerHTML = `
+                <div class="bankName">${bankName}</div>
+                <div class="cardNumber">${formatCardNumber(cardNumber)}</div>
+                <div class="cardHolderName">${cardHolderName}</div>
+                <div class="expiryDate">${expiryMonth}/${expiryYear}</div>
+                <div class="paymentSystem">${paymentSystem}</div>
+            `;
+        }
+
+        cardForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const bankName = document.getElementById('bankName').value;
+            const paymentSystem = document.getElementById('paymentSystem').value;
+            const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+            const cardHolderName = document.getElementById('cardHolderName').value;
+            const expiryMonth = document.getElementById('expiryMonth').value;
+            const expiryYear = document.getElementById('expiryYear').value;
+
+            // Add data to table
+            const newRow = cardTableBody.insertRow();
+            newRow.innerHTML = `
+                <td>${bankName}</td>
+                <td>${paymentSystem}</td>
+                <td>${formatCardNumber(cardNumber)}</td>
+                <td>${cardHolderName}</td>
+                <td>${expiryMonth}/${expiryYear}</td>
+            `;
+
+            // Clear form and card preview
+            cardForm.reset();
+            cardInsert.innerHTML = '';
+            previewBankName.textContent = '';
+            previewCardType.textContent = '';
+            cardLogo.src = '';
+        });
+
+        function formatCardNumber(cardNumber) {
+            return cardNumber.replace(/\D/g, '').replace(/(....)(....)(....)(....)/, '$1 $2 $3 $4');
+        }
+    </script>
+</body>
+</html>
